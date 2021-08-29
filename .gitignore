@@ -1,0 +1,11 @@
+# .env Files
+.env
+
+# virtualenv
+security-system
+
+# Folders
+images/*
+!images/.gitkeep 
+.vscode/*
+__pycache__/*
