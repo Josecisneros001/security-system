@@ -192,191 +192,192 @@ class FaceRecognition():
             print(response['msg'])
 
 class CamaraRead:
-	def __init__(self, source, originalFrame, originalFrameShape, stampedFrame, stampedFrameShape):
-		self.source = source
-		self.originalFrame = originalFrame
-		self.originalFrameShape = originalFrameShape
-		self.stampedFrame = stampedFrame
-		self.stampedFrameShape = stampedFrameShape
+    def __init__(self, source, originalFrame, originalFrameShape, stampedFrame, stampedFrameShape):
+        self.source = source
+        self.originalFrame = originalFrame
+        self.originalFrameShape = originalFrameShape
+        self.stampedFrame = stampedFrame
+        self.stampedFrameShape = stampedFrameShape
 
-		# Frame FileName Variables
-		self.lastRequest = None
-		self.secondId = None
-		self.lastPath = None
+        # Frame FileName Variables
+        self.lastRequest = None
+        self.secondId = None
+        self.lastPath = None
 
-		self.mainLoop()
-	
-	@staticmethod
-	def addText(frame, size, now):
-		font       = cv2.FONT_HERSHEY_SIMPLEX
-		position   = (int(size[1]-100),int(size[0]-50))
-		fontScale  = 0.5
-		fontColor  = (255,255,255)
-		lineType   = 2
-		
-		cv2.rectangle(frame, (position[0], position[1] - 15), (position[0] + 80, position[1] + 5), (0,0,0), -1)
-		cv2.putText(frame, 
-					"Camara 1", 
-					position, 
-					font, 
-					fontScale,
-					fontColor,
-					lineType)
+        self.mainLoop()
+    
+    @staticmethod
+    def addText(frame, size, now):
+        font       = cv2.FONT_HERSHEY_SIMPLEX
+        position   = (int(size[1]-100),int(size[0]-50))
+        fontScale  = 0.5
+        fontColor  = (255,255,255)
+        lineType   = 2
+        
+        cv2.rectangle(frame, (position[0], position[1] - 15), (position[0] + 80, position[1] + 5), (0,0,0), -1)
+        cv2.putText(frame, 
+                    "Camara 1", 
+                    position, 
+                    font, 
+                    fontScale,
+                    fontColor,
+                    lineType)
 
-		position   = (20,20)
+        position   = (20,20)
 
-		cv2.rectangle(frame, (position[0], position[1] - 15), (position[0] + 210, position[1] + 5), (0,0,0), -1)
-		date = now.strftime("%B %d, %Y %H:%M:%S")
-		cv2.putText(frame, 
-					date,
-					position, 
-					font, 
-					fontScale,
-					fontColor,
-					lineType)
-	
-	def getFilename(self):
-		now = datetime.now()
-		date = now.strftime("%m_%d_%Y")
-		hour = now.strftime("%H")
-		minute = now.strftime("%M")
-		if (self.lastRequest == now.strftime("%m_%d_%Y_%H_%M_%S")):
-			self.secondId += 1
-		else:
-			self.secondId = 1
-		self.lastRequest = now.strftime("%m_%d_%Y_%H_%M_%S")
+        cv2.rectangle(frame, (position[0], position[1] - 15), (position[0] + 210, position[1] + 5), (0,0,0), -1)
+        date = now.strftime("%B %d, %Y %H:%M:%S")
+        cv2.putText(frame, 
+                    date,
+                    position, 
+                    font, 
+                    fontScale,
+                    fontColor,
+                    lineType)
+    
+    def getFilename(self):
+        now = datetime.now()
+        date = now.strftime("%m_%d_%Y")
+        hour = now.strftime("%H")
+        minute = now.strftime("%M")
+        if (self.lastRequest == now.strftime("%m_%d_%Y_%H_%M_%S")):
+            self.secondId += 1
+        else:
+            self.secondId = 1
+        self.lastRequest = now.strftime("%m_%d_%Y_%H_%M_%S")
 
-		path = 'images/' + date + '/' + hour + '/' + minute + '/'
-		if not os.path.exists(path):
-			os.makedirs(path)
-		
-		if self.lastPath is not None and self.lastPath != path:
-			self.joinMinute(self.lastPath)
+        path = 'images/' + date + '/' + hour + '/' + minute + '/'
+        if not os.path.exists(path):
+            os.makedirs(path)
+        
+        if self.lastPath is not None and self.lastPath != path:
+            joinThread = threading.Thread(target=self.joinMinute, args=(self.lastPath,))
+            joinThread.start()
 
-		if self.lastPath is None or self.lastPath != path:
-			self.lastPath = path
+        if self.lastPath is None or self.lastPath != path:
+            self.lastPath = path
 
-		return path + now.strftime("%S") + "_" + str(self.secondId)
+        return path + now.strftime("%S") + "_" + str(self.secondId)
 
-	def joinMinute(self, path):
-		os.system('./joinFiles.sh ' + path + ' &> /dev/null')
+    def joinMinute(self, path):
+        os.system('joinFiles.sh ' + path)
 
-	def mainLoop(self):
-		source = self.source
-		originalFrame = self.originalFrame
-		originalFrameShape = self.originalFrameShape
-		stampedFrame = self.stampedFrame
-		stampedFrameShape = self.stampedFrameShape
+    def mainLoop(self):
+        source = self.source
+        originalFrame = self.originalFrame
+        originalFrameShape = self.originalFrameShape
+        stampedFrame = self.stampedFrame
+        stampedFrameShape = self.stampedFrameShape
 
-		print("[INFO] opening video file...", source)
-		vs = cv2.VideoCapture(source)
-		while vs.read()[0] == False:
-			vs = cv2.VideoCapture(self.source)
-		# vs.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*'H264'))
+        print("[INFO] opening video file...", source)
+        vs = cv2.VideoCapture(source)
+        while vs.read()[0] == False:
+            vs = cv2.VideoCapture(self.source)
+        # vs.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*'H264'))
 
-		originalFrame_ = np.frombuffer(originalFrame, dtype=np.uint8)
-		originalFrame_ = originalFrame_.reshape(originalFrameShape)
+        originalFrame_ = np.frombuffer(originalFrame, dtype=np.uint8)
+        originalFrame_ = originalFrame_.reshape(originalFrameShape)
 
-		stampedFrame_ = np.frombuffer(stampedFrame, dtype=np.uint8)
-		stampedFrame_ = stampedFrame_.reshape(stampedFrameShape)
+        stampedFrame_ = np.frombuffer(stampedFrame, dtype=np.uint8)
+        stampedFrame_ = stampedFrame_.reshape(stampedFrameShape)
 
-		while True:
-			lastTime = time.time()
-			status, frame = vs.read()
+        while True:
+            lastTime = time.time()
+            status, frame = vs.read()
 
-			if not status:
-				vs = cv2.VideoCapture(source)
-				vs.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*'H264'))
-				continue
+            if not status:
+                vs = cv2.VideoCapture(source)
+                vs.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*'H264'))
+                continue
 
-			frameStamped = frame.copy()
-			CamaraRead.addText(frameStamped, stampedFrameShape, datetime.now())
-			
-			# Display the resulting frame
-			if VERBOSE:
-				cv2.imshow('Stream', frameStamped)
-				if cv2.waitKey(1) & 0xFF == ord('q'):
-					break
-			
-			encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), 75]
-			cv2.imencode('.jpg', frameStamped, encode_param)[1].tofile(self.getFilename() + '.jpg')
-			# cv2.imwrite(self.getFilename() + '.jpg', frameStamped)
-			# cv2.imwrite(self.getFilename() + '.jpg', frameStamped, [int(cv2.IMWRITE_JPEG_QUALITY), 50])	
-			
-			frame = imutils.resize(frame, width=500)
+            frameStamped = frame.copy()
+            CamaraRead.addText(frameStamped, stampedFrameShape, datetime.now())
+            
+            # Display the resulting frame
+            if VERBOSE:
+                cv2.imshow('Stream', frameStamped)
+                if cv2.waitKey(1) & 0xFF == ord('q'):
+                    break
+            
+            encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), 75]
+            cv2.imencode('.jpg', frameStamped, encode_param)[1].tofile(self.getFilename() + '.jpg')
+            # cv2.imwrite(self.getFilename() + '.jpg', frameStamped)
+            # cv2.imwrite(self.getFilename() + '.jpg', frameStamped, [int(cv2.IMWRITE_JPEG_QUALITY), 50])	
+            
+            frame = imutils.resize(frame, width=500)
 
-			originalFrame_[:] = frame
-			stampedFrame_[:] = frameStamped
+            originalFrame_[:] = frame
+            stampedFrame_[:] = frameStamped
 
-			while time.time() - lastTime  < 1 / MAX_FPS:
-				pass
+            while time.time() - lastTime  < 1 / MAX_FPS:
+                pass
 
 @app.route('/camara')
 def camaraStream():
-	deltaDays = int(request.args.get("deltaDays"))
-	deltaHours = int(request.args.get("deltaHours"))
-	deltaMinutes = int(request.args.get("deltaMinutes"))
-	deltaSeconds = int(request.args.get("deltaSeconds"))
-	deltaFPS = int(request.args.get("deltaFPS"))
-	#Video streaming route. Put this in the src attribute of an img tag
-	return Response(showFrame(deltaDays, deltaHours, deltaMinutes, deltaSeconds, deltaFPS), mimetype='multipart/x-mixed-replace; boundary=frame')
+    deltaDays = int(request.args.get("deltaDays"))
+    deltaHours = int(request.args.get("deltaHours"))
+    deltaMinutes = int(request.args.get("deltaMinutes"))
+    deltaSeconds = int(request.args.get("deltaSeconds"))
+    deltaFPS = int(request.args.get("deltaFPS"))
+    #Video streaming route. Put this in the src attribute of an img tag
+    return Response(showFrame(deltaDays, deltaHours, deltaMinutes, deltaSeconds, deltaFPS), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 @app.route('/faces/<path:filename>')
 def image(filename):
     return send_from_directory('faces/', filename)
 
 def showFrame(deltaDays, deltaHours, deltaMinutes, deltaSeconds, deltaFPS):
-	outputFrame = np.frombuffer(stampedFrame, dtype=np.uint8)
-	outputFrame = outputFrame.reshape(stampedFrameShape)
-	lastPath = None
-	frameStatus = None
-	lastSecond = None
-	lastSecondId = 0
-	secondCache = []
-	lastTime = None
-	while True:
-		lastTime = time.time()
-		if deltaDays != 0 or deltaHours != 0 or deltaMinutes != 0 or deltaSeconds != 0:
-			frame = None
-			dateRequested = datetime.now() + timedelta(days=-deltaDays, hours=-deltaHours, minutes=-deltaMinutes, seconds=-deltaSeconds)
-			date = dateRequested.strftime("%m_%d_%Y")
-			hour = dateRequested.strftime("%H")
-			minute = dateRequested.strftime("%M")
-			second = dateRequested.strftime("%S")
-			miliseconds = dateRequested.strftime("%f")
-			path = 'images/' + date + '/' + hour + '/' + minute + '/'
-			if os.path.exists(path):
-				if lastPath is None or path != lastPath or not frameStatus:
-					cap = cv2.VideoCapture(path + "out.mp4")
-					lastPath = path
-					totalExpectedFrames = 25 * 60
-					totalFrames = cap.get(7)
-					secondsNotRecorded = int(round((totalFrames - totalExpectedFrames) / 25))
+    outputFrame = np.frombuffer(stampedFrame, dtype=np.uint8)
+    outputFrame = outputFrame.reshape(stampedFrameShape)
+    lastPath = None
+    frameStatus = None
+    lastSecond = None
+    lastSecondId = 0
+    secondCache = []
+    lastTime = None
+    while True:
+        lastTime = time.time()
+        if deltaDays != 0 or deltaHours != 0 or deltaMinutes != 0 or deltaSeconds != 0:
+            frame = None
+            dateRequested = datetime.now() + timedelta(days=-deltaDays, hours=-deltaHours, minutes=-deltaMinutes, seconds=-deltaSeconds)
+            date = dateRequested.strftime("%m_%d_%Y")
+            hour = dateRequested.strftime("%H")
+            minute = dateRequested.strftime("%M")
+            second = dateRequested.strftime("%S")
+            miliseconds = dateRequested.strftime("%f")
+            path = 'images/' + date + '/' + hour + '/' + minute + '/'
+            if os.path.exists(path):
+                if lastPath is None or path != lastPath or not frameStatus:
+                    cap = cv2.VideoCapture(path + "out.mp4")
+                    lastPath = path
+                    totalExpectedFrames = 25 * 60
+                    totalFrames = cap.get(7)
+                    secondsNotRecorded = int(round((totalFrames - totalExpectedFrames) / 25))
 
-				if int(second) >= secondsNotRecorded:
-					lastSecondId = min((int(second) - secondsNotRecorded) * 25 + int(round(int(miliseconds) * 25 / 999999)), totalFrames)
-					cap.set(1, lastSecondId)
-					frameStatus, frame = cap.read()
+                if int(second) >= secondsNotRecorded:
+                    lastSecondId = min((int(second) - secondsNotRecorded) * 25 + int(round(int(miliseconds) * 25 / 999999)), totalFrames)
+                    cap.set(1, lastSecondId)
+                    frameStatus, frame = cap.read()
 
-			if frame is None:
-				frame = np.zeros((stampedFrameShape[0], stampedFrameShape[1], 3), np.uint8)
-				CamaraRead.addText(frame, stampedFrameShape, dateRequested)
+            if frame is None:
+                frame = np.zeros((stampedFrameShape[0], stampedFrameShape[1], 3), np.uint8)
+                CamaraRead.addText(frame, stampedFrameShape, dateRequested)
 
-			ret, buffer = cv2.imencode('.jpg', frame)
-		else:
-			ret, buffer = cv2.imencode('.jpg', outputFrame)
-		
-		frame_ready = buffer.tobytes()
-		yield (b'--frame\r\n'
-						b'Content-Type: image/jpeg\r\n\r\n' + frame_ready + b'\r\n')  # concat frame one by one and show result
-		
-		while time.time() - lastTime  < 1 / max(MAX_FPS + deltaFPS, 1):
-				pass
+            ret, buffer = cv2.imencode('.jpg', frame)
+        else:
+            ret, buffer = cv2.imencode('.jpg', outputFrame)
+        
+        frame_ready = buffer.tobytes()
+        yield (b'--frame\r\n'
+                        b'Content-Type: image/jpeg\r\n\r\n' + frame_ready + b'\r\n')  # concat frame one by one and show result
+        
+        while time.time() - lastTime  < 1 / max(MAX_FPS + deltaFPS, 1):
+                pass
 
 @app.route('/')
 def index():
-	"""Video streaming home page."""
-	return render_template('index.html')
+    """Video streaming home page."""
+    return render_template('index.html')
 
 # Start Init
 if __name__  == "__main__":
