@@ -13,7 +13,6 @@ faces/*
 __pycache__/*
 
 node_modules/
-static/css/app.min.css
 package-lock.json
 
 file.txt
