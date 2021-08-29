@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Socket IO -->
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script>
+    <!-- CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/app.min.css') }}">
+
+    <!-- JQuery -->
+    <script type="text/javascript" src="http://code.jquery.com/jquery-latest.min.js"></script>
+    <title>Security System</title>
+</head>
+<body>
+<div class="max-h-screen max-w-full">
+    <div class="flex flex-col sm:px-10">
+        <div class="pt-5 text-center flex-initial text-2xl">
+            Live Streaming
+        </div>
+        <div class="w-full">
+            <div class="flex-1 my-5 max-w-screen-xl mx-auto relative">
+                <img id="stream" alt="Camera0" src="" width="100%">
+                <div id="controllers" class="flex absolute bottom-6 h-4 w-full">
+                    <div class="bar flex w-full cursor-pointer">
+                        <div class="bar-red bg-red-600 h-2" style="width: 100%;"> </div>
+                        <div class="bar-gray bg-gray-500 h-2" style="width: 0%;"> </div>
+                    </div>
+                    <div class="time absolute -top-10 text-white hidden bg-black"> </div>
+                    <div class="timeText absolute left-4 -bottom-6 text-white bg-black text-lg">Live </div>
+                    <!-- 
+                    TODO: Add Pause/Play Controllers
+                    <div class="play flex-1 cursor-pointer hidden">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mx-auto" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                        </svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mx-auto" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    -->
+                    <div class="goLive absolute right-4 -bottom-6 text-white bg-black text-lg cursor-pointer">Go Live </div>
+                </div>
+            </div>
+            <div class="flex-1 my-5 max-w-screen-xl mx-auto text-center">
+                <div id="date" class="text-xl w-full"> </div>
+            </div>
+            <div class="timeControllers flex flex-wrap my-5 max-w-screen-xl mx-auto">
+                <div class="secondsControllers flex-1 pr-4 mt-4 min-w-1/2 sm:min-w-0">
+                    <div class="w-full flex">
+                        <div class="rewind flex-1 cursor-pointer" onclick="changeTime(-5)">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mx-auto" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M8.445 14.832A1 1 0 0010 14v-2.798l5.445 3.63A1 1 0 0017 14V6a1 1 0 00-1.555-.832L10 8.798V6a1 1 0 00-1.555-.832l-6 4a1 1 0 000 1.664l6 4z" />
+                            </svg>
+                        </div>
+                        <div class="forward flex-1 cursor-pointer" onclick="changeTime(5)">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mx-auto" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M4.555 5.168A1 1 0 003 6v8a1 1 0 001.555.832L10 11.202V14a1 1 0 001.555.832l6-4a1 1 0 000-1.664l-6-4A1 1 0 0010 6v2.798l-5.445-3.63z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="w-full text-xl text-center">
+                        Seconds
+                    </div>
+                </div>
+                <div class="minutesControllers flex-1 pr-4 mt-4 min-w-1/2 sm:min-w-0">
+                    <div class="w-full flex">
+                        <div class="rewind flex-1 cursor-pointer" onclick="changeTime(0,-1)">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mx-auto" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M8.445 14.832A1 1 0 0010 14v-2.798l5.445 3.63A1 1 0 0017 14V6a1 1 0 00-1.555-.832L10 8.798V6a1 1 0 00-1.555-.832l-6 4a1 1 0 000 1.664l6 4z" />
+                            </svg>
+                        </div>
+                        <div class="forward flex-1 cursor-pointer" onclick="changeTime(0,1)">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mx-auto" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M4.555 5.168A1 1 0 003 6v8a1 1 0 001.555.832L10 11.202V14a1 1 0 001.555.832l6-4a1 1 0 000-1.664l-6-4A1 1 0 0010 6v2.798l-5.445-3.63z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="w-full text-xl text-center">
+                        Minutes
+                    </div>
+                </div>
+                <div class="hoursControllers flex-1 pr-4 mt-4 min-w-1/2 sm:min-w-0">
+                    <div class="w-full flex">
+                        <div class="rewind flex-1 cursor-pointer" onclick="changeTime(0,0,-1)">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mx-auto" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M8.445 14.832A1 1 0 0010 14v-2.798l5.445 3.63A1 1 0 0017 14V6a1 1 0 00-1.555-.832L10 8.798V6a1 1 0 00-1.555-.832l-6 4a1 1 0 000 1.664l6 4z" />
+                            </svg>
+                        </div>
+                        <div class="forward flex-1 cursor-pointer" onclick="changeTime(0,0,1)">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mx-auto" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M4.555 5.168A1 1 0 003 6v8a1 1 0 001.555.832L10 11.202V14a1 1 0 001.555.832l6-4a1 1 0 000-1.664l-6-4A1 1 0 0010 6v2.798l-5.445-3.63z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="w-full text-xl text-center">
+                        Hours
+                    </div>
+                </div>
+                <div class="daysControllers flex-1 pr-4 mt-4 min-w-1/2 sm:min-w-0">
+                    <div class="w-full flex">
+                        <div class="rewind flex-1 cursor-pointer" onclick="changeTime(0,0,0,-1)">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mx-auto" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M8.445 14.832A1 1 0 0010 14v-2.798l5.445 3.63A1 1 0 0017 14V6a1 1 0 00-1.555-.832L10 8.798V6a1 1 0 00-1.555-.832l-6 4a1 1 0 000 1.664l6 4z" />
+                            </svg>
+                        </div>
+                        <div class="forward flex-1 cursor-pointer" onclick="changeTime(0,0,0,1)">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mx-auto" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M4.555 5.168A1 1 0 003 6v8a1 1 0 001.555.832L10 11.202V14a1 1 0 001.555.832l6-4a1 1 0 000-1.664l-6-4A1 1 0 0010 6v2.798l-5.445-3.63z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="w-full text-xl text-center">
+                        Days
+                    </div>
+                </div>
+            </div>
+            <div class="flex flex-wrap my-5 max-w-screen-xl mx-auto">
+                <div class="FPSControllers pr-4 mt-4 w-60 mx-auto">
+                    <div class="w-full flex">
+                        <div class="rewind flex-1 cursor-pointer" onclick="changeFPS(-2)">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mx-auto" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M8.445 14.832A1 1 0 0010 14v-2.798l5.445 3.63A1 1 0 0017 14V6a1 1 0 00-1.555-.832L10 8.798V6a1 1 0 00-1.555-.832l-6 4a1 1 0 000 1.664l6 4z" />
+                            </svg>
+                        </div>
+                        <div id="deltaFPS" class="text-xl">0</div>
+                        <div class="forward flex-1 cursor-pointer" onclick="changeFPS(2)">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mx-auto" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M4.555 5.168A1 1 0 003 6v8a1 1 0 001.555.832L10 11.202V14a1 1 0 001.555.832l6-4a1 1 0 000-1.664l-6-4A1 1 0 0010 6v2.798l-5.445-3.63z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="w-full text-xl text-center">
+                        FPS
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type = "text/javascript">
+    let deltaDays = 0;
+    let deltaSeconds = 0;
+    let deltaMinutes = 0;
+    let deltaHours = 0;
+    let detlaDays = 0;
+    let deltaFPS = 0;
+    const goLive = () => changeTime(deltaSeconds, deltaMinutes, deltaHours, deltaDays);
+    const changeTime = (seconds = 0, minutes = 0, hours = 0, days = 0) => {
+        const date = new Date();
+        const currentDate = new Date();
+        deltaSeconds -= seconds;
+        deltaMinutes -= minutes;
+        deltaHours -= hours;
+        deltaDays -= days;
+        date.setHours(date.getHours() + deltaHours);
+        date.setMinutes(date.getMinutes() + deltaMinutes);
+        date.setSeconds(date.getSeconds() + deltaSeconds);
+        date.setDate(date.getDate() + deltaDays);
+        
+        deltaSeconds = Math.floor( (date - currentDate)/1000);
+        deltaMinutes = Math.floor(deltaSeconds/60);
+        deltaHours = Math.floor(deltaMinutes/60);
+        deltaDays = Math.floor(deltaHours/24);
+        deltaHours = deltaHours-(deltaDays*24);
+        deltaMinutes = deltaMinutes-(deltaDays*24*60)-(deltaHours*60);
+        deltaSeconds = deltaSeconds-(deltaDays*24*60*60)-(deltaHours*60*60)-(deltaMinutes*60);
+        
+        if (deltaDays < 0 || deltaMinutes < 0 || deltaSeconds < 0 || deltaHours < 0) {
+            deltaDays = 0;
+            deltaMinutes = 0;
+            deltaSeconds = 0;
+            deltaHours = 0;
+        }
+
+        currentDate.setDate(currentDate.getDate() - deltaDays);
+        var options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        $("#date").text(currentDate.toLocaleDateString('es-MX', options));
+        
+        const percentage = 100 - ((deltaSeconds + deltaMinutes * 60 + deltaHours * 60 * 60) * 100 / (60 * 60 * 24));
+        if (deltaDays == 0 && deltaMinutes == 0 && deltaSeconds == 0 && deltaHours == 0) {
+            $("#controllers").children(".timeText").text(`Live`);
+        } else {
+            $("#controllers").children(".timeText").text(`-${deltaHours}h:${deltaMinutes}m:${deltaSeconds}s`);
+        }
+        $("#controllers").find(".bar-red").css({width: `${percentage}%`});
+        $("#controllers").find(".bar-gray").css({width: `${100 - percentage}%`});
+
+        updateStream();
+    }
+    const changeFPS = (delta = 0) => {
+        deltaFPS += delta;
+        $("#deltaFPS").text(deltaFPS);
+        updateStream();
+    }
+    const updateStream = () => {
+        const url = "{{ url_for('camaraStream')}}";
+        $("#stream").attr("src", `${url}?deltaDays=${deltaDays}&deltaHours=${deltaHours}&deltaMinutes=${deltaMinutes}&deltaSeconds=${deltaSeconds}&deltaFPS=${deltaFPS}`);
+    }
+    $(document).ready(function() {
+        $("#controllers > .bar").mouseover(function(ev) {
+            $(this).parent().children(".time").show();
+        });
+        $("#controllers > .bar").mousemove(function(ev) {
+            $(this).parent().children(".time").css({left: ev.clientX - $(this).offset().left - 15 + "px"});
+            const percentage = (ev.clientX - $(this).offset().left) * 100 / $(this).width();
+            const timeDelta = (percentage / 100) * 24;
+            const hourDelta = parseInt(timeDelta);
+            const minuteDelta = parseInt((timeDelta - hourDelta) * (60 / 100) *  100);
+            const time = `-${23 - hourDelta}h:${59 - minuteDelta}m`
+            $(this).parent().children(".time").text(time);
+        });
+        $("#controllers > .bar").click(function(ev) {
+            const percentage = (ev.clientX - $(this).offset().left) * 100 / $(this).width();
+            const timeDelta = (percentage / 100) * 24;
+            const hourDelta = parseInt(timeDelta);
+            const minuteDelta = parseInt((timeDelta - hourDelta) * (60 / 100) *  100);
+            const time = `-${23 - hourDelta}h:${59 - minuteDelta}m:00s`
+            $(this).parent().children(".timeText").text(time);
+            $(this).find(".bar-red").css({width: `${percentage}%`});
+            $(this).find(".bar-gray").css({width: `${100 - percentage}%`});
+            deltaHours = 23 - hourDelta;
+            deltaMinutes = 59 - minuteDelta;
+            deltaSeconds = 0;
+            updateStream();
+        });
+        $("#controllers > .bar").mouseout(function() {
+            $(this).parent().children(".time").hide();
+        });
+        $("#controllers > .goLive").click(function(ev){
+            goLive();
+        });
+        goLive();
+        changeFPS(-10);
+        updateStream();
+    });
+    const USE_SOCKETS = false;
+    if (USE_SOCKETS) {
+        document.addEventListener("DOMContentLoaded", function(event) {
+            const socket = io.connect('http://' + document.domain + ':' + location.port + '/stream', {
+                reconnection: false
+            });
+    
+            socket.on('connect', () => {
+                console.log('Connected');
+                socket.emit('frameRequested', deltaDays, deltaHours, deltaMinutes, deltaSeconds);
+            });
+    
+            socket.on('disconnect', () => {
+                console.log('Disconnected');
+            });
+    
+            socket.on('connect_error', (error) => {
+                console.log('Connect error! ' + error);
+            });
+    
+            socket.on('connect_timeout', (error) => {
+                console.log('Connect timeout! ' + error);
+            });
+    
+            socket.on('error', (error) => {
+                console.log('Error! ' + error);
+            });
+    
+            socket.on('frameRequested', (base64String) => {
+                $("#stream").attr("src", base64String);
+                socket.emit('frameRequested', deltaDays, deltaHours, deltaMinutes, deltaSeconds);
+            });
+        });
+    }
+</script>
+</body>
+</html>
+

@@ -1,0 +1,16 @@
+{
+  "name": "security.system",
+  "version": "1.0.0",
+  "description": "Security System Developed by José Cisneros",
+  "scripts": {
+    "buildcss": "postcss static/css/app.css -o static/css/app.min.css"
+  },
+  "author": "Jose@Cisneros",
+  "license": "ISC",
+  "dependencies": {
+    "autoprefixer": "^10.2.6",
+    "postcss": "^8.3.5",
+    "postcss-cli": "^8.3.1",
+    "tailwindcss": "^2.2.0"
+  }
+}

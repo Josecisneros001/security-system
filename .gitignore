@@ -6,6 +6,16 @@ security-system
 
 # Folders
 images/*
+faces/*
 !images/.gitkeep 
 .vscode/*
 __pycache__/*
+
+images/
+yolo/yolov3.weights
+
+node_modules/
+static/css/app.min.css
+package-lock.json
+
+file.txt

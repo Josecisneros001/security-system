@@ -1,0 +1,9 @@
+﻿@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body {
+    font-family: 'Segoe UI', Arial;
+    scroll-behavior: smooth;
+    line-height: 1.45;
+}

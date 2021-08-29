@@ -1,9 +1,14 @@
 azure-cognitiveservices-vision-face==0.4.1
 python-dotenv==0.15.0
 Pillow==6.2.2
-numpy==1.19.5
 opencv-python==4.4.0.44
 opencv-contrib-python==4.4.0.46
-flask==1.1.2
 pyinstaller==4.2
 pyinstaller-hooks-contrib==2020.11
+Flask==1.1.2
+Flask-SocketIO==4.3.1
+imutils==0.5.4
+numpy==1.21.1
+waitress==1.4.4
+python-engineio==3.13.2
+python-socketio==4.6.0
