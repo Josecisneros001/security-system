@@ -379,32 +379,33 @@ def index():
 	return render_template('index.html')
 
 # Start Init
-source = 0
-originalFrame = None
-originalFrameShape = None
-stampedFrame = None
-stampedFrameShape = None
+if __name__  == "__main__":
+    source = 0
+    originalFrame = None
+    originalFrameShape = None
+    stampedFrame = None
+    stampedFrameShape = None
 
-cap = cv2.VideoCapture(source)
-ret, frame = cap.read()
-stampedFrameShape = frame.shape
-frame = imutils.resize(frame, width=500)
-originalFrameShape = frame.shape
-cap.release()
+    cap = cv2.VideoCapture(source)
+    ret, frame = cap.read()
+    stampedFrameShape = frame.shape
+    frame = imutils.resize(frame, width=500)
+    originalFrameShape = frame.shape
+    cap.release()
 
-originalFrame = Array(ctypes.c_uint8, originalFrameShape[0] * originalFrameShape[1] * originalFrameShape[2], lock=False)
-stampedFrame = Array(ctypes.c_uint8, stampedFrameShape[0] * stampedFrameShape[1] * stampedFrameShape[2], lock=False)
+    originalFrame = Array(ctypes.c_uint8, originalFrameShape[0] * originalFrameShape[1] * originalFrameShape[2], lock=False)
+    stampedFrame = Array(ctypes.c_uint8, stampedFrameShape[0] * stampedFrameShape[1] * stampedFrameShape[2], lock=False)
 
-if True:
-	processAReference = Process(target=CamaraRead, args=(source, originalFrame, originalFrameShape, stampedFrame, stampedFrameShape))
-	processAReference.start()
+    if True:
+        processAReference = Process(target=CamaraRead, args=(source, originalFrame, originalFrameShape, stampedFrame, stampedFrameShape))
+        processAReference.start()
 
-	processBReference = Process(target=FaceRecognition, args=(originalFrame, originalFrameShape))
-	processBReference.start()
+        processBReference = Process(target=FaceRecognition, args=(originalFrame, originalFrameShape))
+        processBReference.start()
 
-from waitress import serve
+    from waitress import serve
 
-app.debug=True
-app.use_reloader=False
-serve(app, host="0.0.0.0", port=8081)
-print("Server 0.0.0.0:8081")
+    app.debug=True
+    app.use_reloader=False
+    serve(app, host="0.0.0.0", port=8081)
+    print("Server 0.0.0.0:8081")
